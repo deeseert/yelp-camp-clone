@@ -1,0 +1,12 @@
+{
+  "name": "v1",
+  "version": "1.0.0",
+  "description": "YelpCamp clone. Will refactor the entire codebase with the new JS syntax",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
