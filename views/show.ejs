@@ -3,5 +3,12 @@
 <h1><%= foundCampground.name %></h1>
 <img src="<%= foundCampground.image %>" alt="">
 <p><%= foundCampground.description %></p>
+<br>
+<p>
+  <% foundCampground.comments.map((comment) => { %>
+  <strong><%= comment.author %></strong> - <%= comment.text %>
+  <%})%>
+
+</p>
 
 <%- include('partials/footer.ejs') %>
