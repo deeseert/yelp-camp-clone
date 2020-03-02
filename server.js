@@ -2,58 +2,21 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/yelp_camp',
+
+mongoose.connect('mongodb://localhost:27017/yelp_camp_v3',
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
   }
 );
 
-// Schema Setup
-const campgroundSchema = new mongoose.Schema({
-  name: String,
-  image: String,
-  description: String
-});
+const Campground = require('./models/campground');
+const seedDB = require('./seeds.js');
+seedDB();
 
-// Compile schema to model
-const Campground = mongoose.model('Campground', campgroundSchema);
-
-// Campground.create(
-//   {
-//     name: 'Terry Camp',
-//     image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60',
-//     description: 'When I introduce people to the concept of using RESTful APIs, they immediately get how powerful it is to retrieve information from the Internet and then manipulate it in software.'
-//   })
-//   .then((c) => console.log('Created: ', c))
-//   .catch(e => console.log(e))
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs')
-
-// const campgrounds = [
-//   { name: 'Torino Camp', image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Another Camp', image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Scampia Camp', image: 'https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Torino Camp', image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Another Camp', image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Scampia Camp', image: 'https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Torino Camp', image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Another Camp', image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Scampia Camp', image: 'https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Torino Camp', image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Another Camp', image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Scampia Camp', image: 'https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Torino Camp', image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Another Camp', image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Scampia Camp', image: 'https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Torino Camp', image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Another Camp', image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Scampia Camp', image: 'https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Torino Camp', image: 'https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Another Camp', image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-//   { name: 'Scampia Camp', image: 'https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60' },
-// ];
 
 app.get('/', (req, res) => {
   res.render('landing');
@@ -86,7 +49,7 @@ app.get('/campgrounds/new', (req, res) => {
 // Show route
 app.get('/campgrounds/:id', (req, res) => {
   const id = req.params.id;
-  Campground.findById(id)
+  Campground.findById(id).populate('comments').exec() // populates the campground module with comments (one to many)
     .then((foundCampground) => {
       console.log('Campground found: ', foundCampground)
       return foundCampground
