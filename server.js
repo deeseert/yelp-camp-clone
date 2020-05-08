@@ -44,6 +44,13 @@ app.set('view engine', 'ejs');
 // app.use(__dirname + '/public');
 app.use(express.static(__dirname + '/public'));
 
+//  Middleware checks if logged in
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+
+  res.redirect('/login');
+};
+
 app.get('/', (req, res) => {
   res.render('landing');
 });
@@ -88,13 +95,13 @@ app.get('/campgrounds/:id', (req, res) => {
 // COMMENT ROUTES
 // ========================================
 
-app.get('/campgrounds/:id/comments/new', (req, res) => {
+app.get('/campgrounds/:id/comments/new', isLoggedIn, (req, res) => {
   const id = req.params.id;
   Campground.findById(id)
     .then((campground) => res.render('comments/new', { campground }))
 });
 
-app.post('/campgrounds/:id/comments', (req, res) => {
+app.post('/campgrounds/:id/comments', isLoggedIn, (req, res) => {
   const id = req.params.id;
   const campground = Campground.findById(id)
   const comment = Comment.create(req.body.comment)
@@ -132,6 +139,25 @@ app.post('/register', (req, res) => {
     });
 
   });
+});
+
+// show login form
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+// handling login logic
+app.post('/login', passport.authenticate('local',
+  {
+    successRedirect: '/campgrounds',
+    failureRedirect: '/login'
+  }), (req, res) => {
+  });
+
+// logic route
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/campgrounds');
 });
 
 
