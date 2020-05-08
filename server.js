@@ -51,6 +51,14 @@ const isLoggedIn = (req, res, next) => {
   res.redirect('/login');
 };
 
+// Middleware to pass a variable to all the templates
+// app.use calls the function/code on every single route!
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
+  next();
+});
+
+
 app.get('/', (req, res) => {
   res.render('landing');
 });
