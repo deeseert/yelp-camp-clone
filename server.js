@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
 
 mongoose.connect('mongodb://localhost:27017/yelp_camp_v3',
   {
@@ -12,8 +14,29 @@ mongoose.connect('mongodb://localhost:27017/yelp_camp_v3',
 
 const Campground = require('./models/campground');
 const Comment = require('./models/comment');
+const User = require('./models/user');
 const seedDB = require('./seeds.js');
 seedDB();
+
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+// app.use(__dirname + '/public');
+app.use(express.static(__dirname + '/public'));
+
+// Passport Config
+app.use(require('express-session')({
+  secret: 'gio testing',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Use Passport
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -83,6 +106,32 @@ app.post('/campgrounds/:id/comments', (req, res) => {
         .then(() => res.redirect(`/campgrounds/${campground._id}`));
     })
     .catch((err) => console.log('Error while processing the comment: ', err))
+});
+
+
+// ========================================
+// AUTH ROUTES
+// ========================================
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+//handle sign up logic
+app.post('/register', (req, res) => {
+  const newUser = new User({ username: req.body.username });
+
+  User.register(newUser, req.body.password, (err, user) => {
+
+    if (err) {
+      console.log(err);
+      return res.render('register');
+    }
+
+    passport.authenticate('local')(req, res, () => {
+      res.redirect('/campgrounds');
+    });
+
+  });
 });
 
 
