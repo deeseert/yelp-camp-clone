@@ -18,7 +18,7 @@ const comments = require('./routes/comments');
 
 const User = require('./models/user');
 const seedDB = require('./seeds.js');
-seedDB();
+// seedDB();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');

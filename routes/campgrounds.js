@@ -3,19 +3,31 @@ const router = express.Router();
 
 const Campground = require('../models/campground');
 
+//  Middleware checks if logged in
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+
+  res.redirect('/login');
+};
+
 router.get('/', (req, res) => {
   Campground.find({})
     .then((campgrounds) => res.render('campgrounds/index', { campgrounds }))
     .catch((err) => console.log('Error from fetching camps: ', err));
 });
 
-router.post('/', (req, res) => {
+router.post('/', isLoggedIn, (req, res) => {
   const { name, image, description } = req.body;
+  const author = {
+    id: req.user._id,
+    username: req.user.username
+  };
 
   const newCampground = new Campground({
     name,
     image,
-    description
+    description,
+    author
   });
 
   newCampground.save()
@@ -23,7 +35,7 @@ router.post('/', (req, res) => {
     .catch((err) => console.log('Error while saving: ', err))
 });
 
-router.get('/new', (req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
   res.render('campgrounds/new');
 });
 
