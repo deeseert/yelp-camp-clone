@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const Campground = require('../models/campground');
+const middleware = require('../middleware');
 
 //  Middleware checks if logged in
 const isLoggedIn = (req, res, next) => {
@@ -52,20 +53,20 @@ router.get('/:id', (req, res) => {
 });
 
 // Show Edit form
-router.get('/:id/edit', (req, res) => {
+router.get('/:id/edit', middleware.checkCampgroundOwnership, (req, res) => {
   const id = req.params.id;
   Campground.findById(id)
     .then((campground) => {
       res.render('campgrounds/edit', { campground });
     })
-    .catch((err) => {
-      console.log('Error in showing the edit form: '.err);
-      res.redirect('/campgrounds');
-    })
+  // .catch((err) => {
+  //   console.log('Error in showing the edit form: '.err);
+  //   res.redirect('/campgrounds');
+  // })
 });
 
 // Update Campground
-router.put('/:id', (req, res) => {
+router.put('/:id', middleware.checkCampgroundOwnership, (req, res) => {
   const { name, image, description } = req.body;
   const id = req.params.id;
 
@@ -85,7 +86,7 @@ router.put('/:id', (req, res) => {
 });
 
 // Delete
-router.delete('/:id', (req, res) => {
+router.delete('/:id', middleware.checkCampgroundOwnership, (req, res) => {
   const id = req.params.id;
   Campground.findByIdAndRemove(id)
     .then(() => res.redirect('/campgrounds'))
