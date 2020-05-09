@@ -39,7 +39,7 @@ router.get('/new', isLoggedIn, (req, res) => {
   res.render('campgrounds/new');
 });
 
-// Show route
+// Show single campground
 router.get('/:id', (req, res) => {
   const id = req.params.id;
   Campground.findById(id).populate('comments').exec() // populates the campground module with comments (one to many)
@@ -49,6 +49,47 @@ router.get('/:id', (req, res) => {
     })
     .then((foundCampground) => res.render('campgrounds/show', { foundCampground }))
     .catch((err) => console.log('Error from findById: ', err))
+});
+
+// Show Edit form
+router.get('/:id/edit', (req, res) => {
+  const id = req.params.id;
+  Campground.findById(id)
+    .then((campground) => {
+      res.render('campgrounds/edit', { campground });
+    })
+    .catch((err) => {
+      console.log('Error in showing the edit form: '.err);
+      res.redirect('/campgrounds');
+    })
+});
+
+// Update Campground
+router.put('/:id', (req, res) => {
+  const { name, image, description } = req.body;
+  const id = req.params.id;
+
+  const newCampgroundData = {
+    name,
+    image,
+    description
+  };
+
+  Campground.findByIdAndUpdate(id, newCampgroundData)
+    .then((campgroundUpdated) => {
+      res.redirect(`/campgrounds/${id}`);
+    })
+    .catch((err) => {
+      res.redirect('/campgrounds');
+    });
+});
+
+// Delete
+router.delete('/:id', (req, res) => {
+  const id = req.params.id;
+  Campground.findByIdAndRemove(id)
+    .then(() => res.redirect('/campgrounds'))
+    .catch(() => res.redirect('/campgrounds'))
 });
 
 module.exports = router;
