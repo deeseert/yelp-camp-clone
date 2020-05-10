@@ -4,6 +4,8 @@ const router = express.Router({ mergeParams: true });
 const Campground = require('../models/campground');
 const Comment = require('../models/comment');
 
+const middleware = require('../middleware');
+
 //  Middleware checks if logged in
 const isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) return next();
@@ -32,6 +34,39 @@ router.post('/', isLoggedIn, (req, res) => {
         .then(() => res.redirect(`/campgrounds/${campground._id}`));
     })
     .catch((err) => console.log('Error while processing the comment: ', err))
+});
+
+// COMMENT EDIT ROUTE
+router.get('/:comment_id/edit', middleware.checkCommentOwnership, (req, res) => {
+  Comment.findById(req.params.comment_id)
+    .then((comment) => {
+      res.render('comments/edit', { campground_id: req.params.id, comment });
+    })
+    .catch(() => {
+      res.redirect('back');
+    });
+});
+
+// COMMENT UPDATE
+router.put('/:comment_id', middleware.checkCommentOwnership, (req, res) => {
+  Comment.findByIdAndUpdate(req.params.comment_id, { text: req.body.comment })
+    .then(() => {
+      res.redirect(`/campgrounds/${req.params.id}`);
+    })
+    .catch(() => {
+      res.redirect('back');
+    });
+});
+
+// COMMENT DESTROY ROUTE
+router.delete('/:comment_id', middleware.checkCommentOwnership, (req, res) => {
+  Comment.findByIdAndRemove(req.params.comment_id)
+    .then(() => {
+      res.redirect(`/campgrounds/${req.params.id}`);
+    })
+    .catch(() => {
+      res.redirect('back');
+    });
 });
 
 module.exports = router;

@@ -9,9 +9,12 @@ const methodOverride = require('method-override');
 mongoose.connect('mongodb://localhost:27017/yelp_camp_v3',
   {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false
   }
 );
+
+// mongoose.set('useFindAndModify', false);
 
 const campgrounds = require('./routes/campgrounds');
 const index = require('./routes/index');
