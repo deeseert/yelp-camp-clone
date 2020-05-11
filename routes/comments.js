@@ -6,20 +6,14 @@ const Comment = require('../models/comment');
 
 const middleware = require('../middleware');
 
-//  Middleware checks if logged in
-const isLoggedIn = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
 
-  res.redirect('/login');
-};
-
-router.get('/new', isLoggedIn, (req, res) => {
+router.get('/new', middleware.isLoggedIn, (req, res) => {
   const id = req.params.id;
   Campground.findById(id)
     .then((campground) => res.render('comments/new', { campground }))
 });
 
-router.post('/', isLoggedIn, (req, res) => {
+router.post('/', middleware.isLoggedIn, (req, res) => {
   const id = req.params.id;
   const campground = Campground.findById(id);
   const comment = Comment.create(req.body.comment);
