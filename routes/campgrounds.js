@@ -32,12 +32,13 @@ router.get('/', (req, res) => {
         Campground.find({ name: regex })
           .then((allCampgrounds) => {
             res.status(200).json(allCampgrounds);
+
+            if (req.xhr) {
+              res.json(allCampgrounds);
+            }
+
           })
           .catch((err) => console.log(err))
-      }
-
-      if (req.xhr) {
-        res.json(allCampgrounds);
       }
 
       res.render('campgrounds/index', { campgrounds, page: 'campgrounds' })
