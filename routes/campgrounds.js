@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const geocoder = require('geocoder');
+const NodeGeocoder = require('node-geocoder');
+const options = {
+  provider: 'google',
+  httpAdapter: 'https',
+  apiKey: process.env.GEOCODER_API_KEY,
+  formatter: null
+};
+
+const geocoder = NodeGeocoder(options);
 
 const Campground = require('../models/campground');
 const middleware = require('../middleware');
@@ -10,6 +18,8 @@ const middleware = require('../middleware');
 const escapeRegex = (text) => {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
+
+console.log('Env from campgrounds.js: ', process.env.GEOCODER_API_KEY);
 
 // Get all Campgrounds
 router.get('/', (req, res) => {
@@ -37,31 +47,34 @@ router.get('/', (req, res) => {
 
 // Create Campground
 router.post('/', middleware.isLoggedIn, middleware.isSafe, (req, res) => {
-  const { name, image, description, price } = req.body;
+  const { name, image, description, cost } = req.body;
   const author = {
     id: req.user._id,
     username: req.user.username
   };
+
   geocoder.geocode(req.body.location, (err, data) => {
-    if (err || data.status === 'ZERO_RESULTS') {
+    console.log('Data from Geo: ', data);
+    if (err || !data.length) {
       req.flash('error', 'Invalid address');
       return res.redirect('back');
     }
-    const lat = data.results[0].geometry.location.lat;
-    const lng = data.results[0].geometry.location.lng;
-    const location = data.results[0].formatted_address;
+    const lat = data[0].latitude;
+    const lng = data[0].longitude;
+    const location = data[0].formattedAddress;
 
     const newCampground = new Campground({
       name,
       image,
       description,
-      price,
+      cost,
       author,
       lat,
       lng,
       location
     });
 
+    // Campground.create(newCampground)
     newCampground.save()
       .then(() => res.redirect('/campgrounds'))
       .catch((err) => console.log('Error while saving: ', err))
@@ -70,6 +83,7 @@ router.post('/', middleware.isLoggedIn, middleware.isSafe, (req, res) => {
 
 //NEW - show form to create new campground
 router.get('/new', middleware.isLoggedIn, (req, res) => {
+  console.log('Env from campgrounds.js: ', process.env.GEOCODER_API_KEY);
   res.render('campgrounds/new');
 });
 
@@ -88,26 +102,31 @@ router.get('/:id/edit', middleware.isLoggedIn, middleware.checkCampgroundOwnersh
     .then((campground) => {
       res.render('campgrounds/edit', { campground });
     })
-  // .catch((err) => {
-  //   console.log('Error in showing the edit form: '.err);
-  //   res.redirect('/campgrounds');
-  // })
+    .catch((err) => {
+      console.log('Error in showing the edit form: ', err);
+      res.redirect('/campgrounds');
+    })
 });
 
 // Update Campground
 router.put('/:id', middleware.checkCampgroundOwnership, middleware.isSafe, (req, res) => {
-  const { name, image, description, price } = req.body;
+  const { name, image, description, cost } = req.body;
   const id = req.params.id;
 
   geocoder.geocode(req.body.location, (err, data) => {
-    const lat = data.results[0].geometry.location.lat;
-    const lng = data.results[0].geometry.location.lng;
-    const location = data.results[0].formatted_address;
+    if (err || !data.length) {
+      req.flash('error', 'Invalid address');
+      return res.redirect('back');
+    };
+
+    const lat = data[0].latitude;
+    const lng = data[0].longitude;
+    const location = data[0].formattedAddress;
 
     const newCampgroundData = {
       name,
       image,
-      price,
+      cost,
       description,
       location,
       lat,

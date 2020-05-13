@@ -1,3 +1,4 @@
+// require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -8,9 +9,11 @@ const LocalStrategy = require('passport-local');
 const methodOverride = require('method-override');
 const flash = require('connect-flash');
 const moment = require('moment');
-
+const dotenv = require('dotenv');
 // configure dotenv
 // require('dotenv').load();
+dotenv.config();
+console.log('Env from server.js: ', process.env.GEOCODER_API_KEY);
 
 const campgrounds = require('./routes/campgrounds');
 const index = require('./routes/index');

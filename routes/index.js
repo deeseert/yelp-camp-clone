@@ -16,24 +16,24 @@ router.get('/register', (req, res) => {
 
 //handle sign up logic
 router.post('/register', (req, res) => {
-  const newUser = new User({ username: req.body.username });
-  if (req.body.adminCode === process.env.ADMIN_CODE) {
+  const { username, password, adminCode } = req.body;
+  const newUser = new User({ username });
+
+  if (adminCode === process.env.ADMIN_CODE) {
     newUser.isAdmin = true;
   }
 
-  User.register(newUser, req.body.password, (err, user) => {
-
-    if (err) {
+  User.register(newUser, password)
+    .then(() => {
+      passport.authenticate('local')(req, res, () => {
+        req.flash('success', `Successfully Signed Up! Nice to meet you ${username}`);
+        res.redirect('/campgrounds');
+      });
+    })
+    .catch((err) => {
       console.log(err);
       return res.render('register');
-    }
-
-    passport.authenticate('local')(req, res, () => {
-      req.flash('success', `Successfully Signed Up! Nice to meet you ${req.body.username}`);
-      res.redirect('/campgrounds');
-    });
-
-  });
+    })
 });
 
 // show login form

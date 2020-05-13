@@ -17,7 +17,7 @@ router.get('/new', middleware.isLoggedIn, (req, res) => {
 router.post('/', middleware.isLoggedIn, (req, res) => {
   const id = req.params.id;
   const campground = Campground.findById(id);
-  const comment = Comment.create(req.body.comment);
+  const comment = Comment.create({ comment: req.body.comment });
 
   Promise.all([campground, comment])
     .then(([campground, comment]) => {

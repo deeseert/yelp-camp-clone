@@ -3,48 +3,61 @@ const Comment = require('../models/comment');
 
 
 module.exports = {
-  checkCampgroundOwnership: (req, res, next) => {
-    const id = req.params.id;
-
+  checkCampgroundOwnership: function (req, res, next) {
     if (req.isAuthenticated()) {
-      Campground.findById(id)
-        .then((foundCampground) => {
-          // does user own the campground?
-          if (foundCampground.author.id.equals(req.user._id)) {
-            next();
-          }
-          res.redirect('back');
-        })
-        .catch((err) => {
-          console.log('Err: ', err);
-          res.redirect('back');
-        })
+      Campground.findById(req.params.id, function (err, campground) {
+        if (campground.author.id.equals(req.user._id) || req.user.isAdmin) {
+          next();
+        } else {
+          req.flash("error", "You don't have permission to do that!");
+          console.log("BADD!!!");
+          res.redirect("/campgrounds/" + req.params.id);
+        }
+      });
+    } else {
+      req.flash("error", "You need to be signed in to do that!");
+      res.redirect("/login");
     }
-
-    req.flash('error', 'You don\'t have permission to do that!');
-    res.redirect(`/campgrounds/${req.params.id}`);
-
   },
 
-  checkCommentOwnership: (req, res, next) => {
-    const id = req.params.comment_id;
+
+  // checkCommentOwnership: (req, res, next) => {
+  //   const id = req.params.comment_id;
+  //   if (req.isAuthenticated()) {
+  //     Comment.findById(id)
+  //       .then((foundComment) => {
+  //         // does user own the comment?
+  //         if (foundComment.author.id.equals(req.user._id) || req.user.isAdmin) {
+  //           next();
+  //         }
+  //         res.redirect('back');
+  //       })
+  //       .catch((err) => {
+  //         console.log('Err: ', err);
+  //         res.redirect('back');
+  //       })
+  //   }
+  //   req.flash('error', 'You don\'t have permission to do that!');
+  //   res.redirect(`/campgrounds/${req.params.id}`);
+  // },
+
+  checkCommentOwnership: function (req, res, next) {
+    console.log("YOU MADE IT!");
     if (req.isAuthenticated()) {
-      Comment.findById(id)
-        .then((foundComment) => {
-          // does user own the comment?
-          if (foundComment.author.id.equals(req.user._id)) {
-            next();
-          }
-          res.redirect('back');
-        })
-        .catch((err) => {
-          console.log('Err: ', err);
-          res.redirect('back');
-        })
+      Comment.findById(req.params.comment_id, function (err, comment) {
+        if (comment.author.id.equals(req.user._id) || req.user.isAdmin) {
+          next();
+        } else {
+          req.flash("error", "You don't have permission to do that!");
+          res.redirect("/campgrounds/" + req.params.id);
+        }
+      });
+    } else {
+      req.flash("error", "You need to be signed in to do that!");
+      res.redirect("login");
     }
-    req.flash('error', 'You don\'t have permission to do that!');
-    res.redirect(`/campgrounds/${req.params.id}`);
   },
+
 
   isLoggedIn: (req, res, next) => {
     if (req.isAuthenticated()) return next();
