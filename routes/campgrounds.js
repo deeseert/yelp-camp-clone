@@ -160,7 +160,7 @@ router.get('/new', (req, res) => {
 // Show single campground
 router.get('/:slug', (req, res) => {
   const id = req.params.id;
-  Campground.findOne({ slug: req.params.slug }).populate('comments').exec() // populates the campground module with comments (one to many)
+  Campground.findOne({ slug: req.params.slug }).populate('comments likes').exec() // populates the campground module with comments (one to many)
     .then((campground) => res.render('campgrounds/show', { campground }))
     .catch((err) => console.log('Error from findById: ', err))
 });
@@ -248,5 +248,37 @@ router.delete('/:slug', checkCampgroundOwnership, (req, res) => {
       res.redirect('/campgrounds');
     })
 });
+
+// Campground Like Route
+router.post("/:id/like", function (req, res) {
+  Campground.findById(req.params.id, function (err, foundCampground) {
+    if (err) {
+      console.log(err);
+      return res.redirect("/campgrounds");
+    }
+
+    // check if req.user._id exists in foundCampground.likes
+    var foundUserLike = foundCampground.likes.some(function (like) {
+      return like.equals(req.user._id);
+    });
+
+    if (foundUserLike) {
+      // user already liked, removing like
+      foundCampground.likes.pull(req.user._id);
+    } else {
+      // adding the new user like
+      foundCampground.likes.push(req.user);
+    }
+
+    foundCampground.save(function (err) {
+      if (err) {
+        console.log(err);
+        return res.redirect("/campgrounds");
+      }
+      return res.redirect("/campgrounds");
+    });
+  });
+});
+
 
 module.exports = router;
