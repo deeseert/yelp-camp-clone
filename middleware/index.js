@@ -5,7 +5,7 @@ const Comment = require('../models/comment');
 module.exports = {
   checkCampgroundOwnership: function (req, res, next) {
     if (req.isAuthenticated()) {
-      Campground.findById(req.params.id, function (err, campground) {
+      Campground.findOne({ slug: req.params.slug }, function (err, campground) {
         if (campground.author.id.equals(req.user._id) || req.user.isAdmin) {
           next();
         } else {

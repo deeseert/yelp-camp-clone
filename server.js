@@ -81,7 +81,7 @@ app.use((req, res, next) => {
 // Require and use routes
 app.use('/campgrounds', campgrounds);
 app.use('/', index);
-app.use('/campgrounds/:id/comments', comments);
+app.use('/campgrounds/:slug/comments', comments);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

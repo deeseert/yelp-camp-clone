@@ -158,17 +158,17 @@ router.get('/new', (req, res) => {
 });
 
 // Show single campground
-router.get('/:id', (req, res) => {
+router.get('/:slug', (req, res) => {
   const id = req.params.id;
-  Campground.findById(id).populate('comments').exec() // populates the campground module with comments (one to many)
+  Campground.findOne({ slug: req.params.slug }).populate('comments').exec() // populates the campground module with comments (one to many)
     .then((campground) => res.render('campgrounds/show', { campground }))
     .catch((err) => console.log('Error from findById: ', err))
 });
 
 // EDIT - shows edit form for a campground
-router.get('/:id/edit', checkCampgroundOwnership, (req, res) => {
+router.get('/:slug/edit', checkCampgroundOwnership, (req, res) => {
   const id = req.params.id;
-  Campground.findById(id)
+  Campground.findOne({ slug: req.params.slug })
     .then((campground) => {
       res.render('campgrounds/edit', { campground });
     })
@@ -179,13 +179,13 @@ router.get('/:id/edit', checkCampgroundOwnership, (req, res) => {
 });
 
 // Update Campground
-router.put('/:id', upload.single('image'), checkCampgroundOwnership, (req, res) => {
+router.put('/:slug', upload.single('image'), checkCampgroundOwnership, (req, res) => {
   const { name, description, cost } = req.body;
   let image = req.body.image;
   const id = req.params.id;
 
 
-  Campground.findById(id)
+  Campground.findOne({ slug: req.params.slug })
     .then((campground) => {
 
       geocoder.geocode(req.body.location, async (err, data) => {
@@ -232,9 +232,9 @@ router.put('/:id', upload.single('image'), checkCampgroundOwnership, (req, res) 
 });
 
 // Delete
-router.delete('/:id', checkCampgroundOwnership, (req, res) => {
+router.delete('/:slug', checkCampgroundOwnership, (req, res) => {
   const id = req.params.id;
-  Campground.findById(id)
+  Campground.findOneAndRemove({ slug: req.params.slug })
     .then((campground) => {
       cloudinary.v2.uploader.destroy(campground.imageId)
         .then(() => {

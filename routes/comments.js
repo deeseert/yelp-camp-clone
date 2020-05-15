@@ -10,14 +10,15 @@ router.use(isLoggedIn);
 
 router.get('/new', (req, res) => {
   const id = req.params.id;
-  Campground.findById(id)
+  console.log(req.params.slug);
+  Campground.findOne({ slug: req.params.slug })
     .then((campground) => res.render('comments/new', { campground }))
 });
 
 // Comments Create
 router.post('/', (req, res) => {
   const id = req.params.id;
-  const campground = Campground.findById(id);
+  const campground = findOne({ slug: req.params.slug });
   const comment = Comment.create({ comment: req.body.comment });
 
   Promise.all([campground, comment])
@@ -29,7 +30,7 @@ router.post('/', (req, res) => {
       campground.save()
         .then(() => {
           req.flash('success', 'Comment created!');
-          res.redirect(`/campgrounds/${campground._id}`)
+          res.redirect(`/campgrounds/${campground.slug}`)
         });
     })
     .catch((err) => console.log('Error while processing the comment: ', err))
@@ -39,7 +40,7 @@ router.post('/', (req, res) => {
 router.get('/:comment_id/edit', checkCommentOwnership, (req, res) => {
   Comment.findById(req.params.comment_id)
     .then((comment) => {
-      res.render('comments/edit', { campground_id: req.params.id, comment });
+      res.render('comments/edit', { campground_slug: req.params.slug, comment });
     })
     .catch(() => {
       res.redirect('back');
@@ -50,7 +51,7 @@ router.get('/:comment_id/edit', checkCommentOwnership, (req, res) => {
 router.put('/:comment_id', checkCommentOwnership, isAdmin, (req, res) => {
   Comment.findByIdAndUpdate(req.params.comment_id, { text: req.body.comment })
     .then(() => {
-      res.redirect(`/campgrounds/${req.params.id}`);
+      res.redirect(`/campgrounds/${req.params.slug}`);
     })
     .catch(() => {
       res.redirect('back');
@@ -61,7 +62,7 @@ router.put('/:comment_id', checkCommentOwnership, isAdmin, (req, res) => {
 router.delete('/:comment_id', checkCommentOwnership, isAdmin, (req, res) => {
   Comment.findByIdAndRemove(req.params.comment_id)
     .then(() => {
-      res.redirect(`/campgrounds/${req.params.id}`);
+      res.redirect(`/campgrounds/${req.params.slug}`);
     })
     .catch(() => {
       res.redirect('back');
