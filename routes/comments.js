@@ -4,17 +4,18 @@ const router = express.Router({ mergeParams: true });
 const Campground = require('../models/campground');
 const Comment = require('../models/comment');
 
-const middleware = require('../middleware');
+const { checkCommentOwnership, isLoggedIn, isAdmin } = require("../middleware");
+router.use(isLoggedIn);
 
 
-router.get('/new', middleware.isLoggedIn, (req, res) => {
+router.get('/new', (req, res) => {
   const id = req.params.id;
   Campground.findById(id)
     .then((campground) => res.render('comments/new', { campground }))
 });
 
 // Comments Create
-router.post('/', middleware.isLoggedIn, (req, res) => {
+router.post('/', (req, res) => {
   const id = req.params.id;
   const campground = Campground.findById(id);
   const comment = Comment.create({ comment: req.body.comment });
@@ -35,7 +36,7 @@ router.post('/', middleware.isLoggedIn, (req, res) => {
 });
 
 // COMMENT EDIT ROUTE
-router.get('/:comment_id/edit', middleware.checkCommentOwnership, middleware.isLoggedIn, (req, res) => {
+router.get('/:comment_id/edit', checkCommentOwnership, (req, res) => {
   Comment.findById(req.params.comment_id)
     .then((comment) => {
       res.render('comments/edit', { campground_id: req.params.id, comment });
@@ -46,7 +47,7 @@ router.get('/:comment_id/edit', middleware.checkCommentOwnership, middleware.isL
 });
 
 // COMMENT UPDATE
-router.put('/:comment_id', middleware.checkCommentOwnership, middleware.isAdmin, (req, res) => {
+router.put('/:comment_id', checkCommentOwnership, isAdmin, (req, res) => {
   Comment.findByIdAndUpdate(req.params.comment_id, { text: req.body.comment })
     .then(() => {
       res.redirect(`/campgrounds/${req.params.id}`);
@@ -57,7 +58,7 @@ router.put('/:comment_id', middleware.checkCommentOwnership, middleware.isAdmin,
 });
 
 // COMMENT DESTROY ROUTE
-router.delete('/:comment_id', middleware.checkCommentOwnership, middleware.isAdmin, (req, res) => {
+router.delete('/:comment_id', checkCommentOwnership, isAdmin, (req, res) => {
   Comment.findByIdAndRemove(req.params.comment_id)
     .then(() => {
       res.redirect(`/campgrounds/${req.params.id}`);

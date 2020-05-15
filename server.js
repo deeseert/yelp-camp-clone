@@ -34,9 +34,12 @@ mongoose.connect('mongodb://localhost:27017/yelp_camp_v3',
   .then(() => console.log(`Database connected`))
   .catch(err => console.log(`Database connection error: ${err.message}`));
 
-seedDB();
+// seedDB();
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true })); // Old syntax
+// app.use(bodyParser.json()); // Old syntax
+app.use(express.json()); // New syntax
+app.use(express.urlencoded({ extended: true })); // New syntax
 app.set('view engine', 'ejs');
 // app.use(__dirname + '/public');
 app.use(express.static(__dirname + '/public'));

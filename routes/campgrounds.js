@@ -4,6 +4,10 @@ const NodeGeocoder = require('node-geocoder');
 const multer = require('multer');
 const cloudinary = require('cloudinary');
 
+const Campground = require('../models/campground');
+const { checkCampgroundOwnership, isLoggedIn, isPaid } = require('../middleware');
+router.use(isLoggedIn, isPaid);
+
 const options = {
   provider: 'google',
   httpAdapter: 'https',
@@ -35,8 +39,6 @@ cloudinary.config({
 });
 // ---- Upload images -----end
 
-const Campground = require('../models/campground');
-const middleware = require('../middleware');
 
 
 // Define escapeRegex function for search feature
@@ -48,6 +50,9 @@ const escapeRegex = (text) => {
 //INDEX - show all campgrounds
 router.get("/", function (req, res) {
   var noMatch = null;
+
+  if (req.query.paid) res.locals.success = 'Payment succeeded, welcome to YelpCamp!';
+
   if (req.query.search) {
     const regex = new RegExp(escapeRegex(req.query.search), 'gi');
     // Get all campgrounds from DB
@@ -99,7 +104,7 @@ router.get("/", function (req, res) {
 // });
 
 // Create Campground
-router.post('/', middleware.isLoggedIn, upload.single('image'), (req, res) => {
+router.post('/', upload.single('image'), (req, res) => {
   const { name, description, cost } = req.body;
   let image = req.body.image;
   const author = {
@@ -148,7 +153,7 @@ router.post('/', middleware.isLoggedIn, upload.single('image'), (req, res) => {
 });
 
 //NEW - show form to create new campground
-router.get('/new', middleware.isLoggedIn, (req, res) => {
+router.get('/new', (req, res) => {
   res.render('campgrounds/new');
 });
 
@@ -161,7 +166,7 @@ router.get('/:id', (req, res) => {
 });
 
 // EDIT - shows edit form for a campground
-router.get('/:id/edit', middleware.isLoggedIn, middleware.checkCampgroundOwnership, (req, res) => {
+router.get('/:id/edit', checkCampgroundOwnership, (req, res) => {
   const id = req.params.id;
   Campground.findById(id)
     .then((campground) => {
@@ -174,7 +179,7 @@ router.get('/:id/edit', middleware.isLoggedIn, middleware.checkCampgroundOwnersh
 });
 
 // Update Campground
-router.put('/:id', upload.single('image'), middleware.checkCampgroundOwnership, (req, res) => {
+router.put('/:id', upload.single('image'), checkCampgroundOwnership, (req, res) => {
   const { name, description, cost } = req.body;
   let image = req.body.image;
   const id = req.params.id;
@@ -227,7 +232,7 @@ router.put('/:id', upload.single('image'), middleware.checkCampgroundOwnership, 
 });
 
 // Delete
-router.delete('/:id', middleware.checkCampgroundOwnership, middleware.isLoggedIn, (req, res) => {
+router.delete('/:id', checkCampgroundOwnership, (req, res) => {
   const id = req.params.id;
   Campground.findById(id)
     .then((campground) => {
