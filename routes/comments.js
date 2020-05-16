@@ -18,7 +18,7 @@ router.get('/new', (req, res) => {
 // Comments Create
 router.post('/', (req, res) => {
   const id = req.params.id;
-  const campground = findOne({ slug: req.params.slug });
+  const campground = Comment.findOne({ slug: req.params.slug });
   const comment = Comment.create({ comment: req.body.comment });
 
   Promise.all([campground, comment])

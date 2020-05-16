@@ -5,6 +5,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary');
 
 const Campground = require('../models/campground');
+const Review = require("../models/review");
 const { checkCampgroundOwnership, isLoggedIn, isPaid } = require('../middleware');
 router.use(isLoggedIn, isPaid);
 
@@ -160,7 +161,10 @@ router.get('/new', (req, res) => {
 // Show single campground
 router.get('/:slug', (req, res) => {
   const id = req.params.id;
-  Campground.findOne({ slug: req.params.slug }).populate('comments likes').exec() // populates the campground module with comments (one to many)
+  Campground.findOne({ slug: req.params.slug }).populate('comments likes').populate({
+    path: "reviews",
+    options: { sort: { createdAt: -1 } }
+  }).exec() // populates the campground module with comments (one to many)
     .then((campground) => res.render('campgrounds/show', { campground }))
     .catch((err) => console.log('Error from findById: ', err))
 });
@@ -184,6 +188,7 @@ router.put('/:slug', upload.single('image'), checkCampgroundOwnership, (req, res
   let image = req.body.image;
   const id = req.params.id;
 
+  delete req.body.campground.rating;
 
   Campground.findOne({ slug: req.params.slug })
     .then((campground) => {
@@ -234,13 +239,24 @@ router.put('/:slug', upload.single('image'), checkCampgroundOwnership, (req, res
 // Delete
 router.delete('/:slug', checkCampgroundOwnership, (req, res) => {
   const id = req.params.id;
-  Campground.findOneAndRemove({ slug: req.params.slug })
+  Campground.findOne({ slug: req.params.slug })
     .then((campground) => {
+
       cloudinary.v2.uploader.destroy(campground.imageId)
         .then(() => {
           Campground.remove();
           req.flash('success', 'Campground removed successfully!');
           res.redirect('/campgrounds');
+        })
+
+      Comment.remove({ "_id": { $in: campground.comments } })
+        .then(() => {
+          Review.remove({ "_id": { $in: campground.reviews } })
+            .then(() => {
+              campground.remove();
+              req.flash("success", "Campground deleted successfully!");
+              res.redirect("/campgrounds");
+            })
         })
     })
     .catch((err) => {

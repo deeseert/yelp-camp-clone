@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const campgroundSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: "Campground name cannot be blank."
+    required: 'Campground name cannot be blank.'
   },
   cost: String,
   slug: {
@@ -34,16 +34,27 @@ const campgroundSchema = new mongoose.Schema({
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      ref: 'User'
     }
-  ]
+  ],
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Review'
+    }
+  ],
+  rating: {
+    type: Number,
+    default: 0
+  }
+
 });
 
 // add a slug before the campground gets saved to the database
 campgroundSchema.pre('save', async function (next) {
   try {
     // check if a new campground is being saved, or if the campground name is being modified
-    if (this.isNew || this.isModified("name")) {
+    if (this.isNew || this.isModified('name')) {
       this.slug = await generateUniqueSlug(this._id, this.name);
     }
     next();
@@ -62,7 +73,7 @@ campgroundSchema.pre('save', async function (next) {
 
 
 // Compile schema to model
-Campground = mongoose.model("Campground", campgroundSchema);
+Campground = mongoose.model('Campground', campgroundSchema);
 module.exports = Campground;
 
 async function generateUniqueSlug(id, campgroundName, slug) {
@@ -94,5 +105,5 @@ function slugify(text) {
     .replace(/^-+/, '')          // Trim - from start of text
     .replace(/-+$/, '')          // Trim - from end of text
     .substring(0, 75);           // Trim at 75 characters
-  return slug + "-" + Math.floor(1000 + Math.random() * 9000);  // Add 4 random digits to improve uniqueness
+  return slug + '-' + Math.floor(1000 + Math.random() * 9000);  // Add 4 random digits to improve uniqueness
 }

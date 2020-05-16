@@ -18,6 +18,7 @@ console.log('Env from server.js: ', process.env.GEOCODER_API_KEY);
 const campgrounds = require('./routes/campgrounds');
 const index = require('./routes/index');
 const comments = require('./routes/comments');
+const reviewRoutes = require("./routes/reviews");
 
 const User = require('./models/user');
 const seedDB = require('./seeds.js');
@@ -82,6 +83,7 @@ app.use((req, res, next) => {
 app.use('/campgrounds', campgrounds);
 app.use('/', index);
 app.use('/campgrounds/:slug/comments', comments);
+app.use('/campgrounds/:slug/reviews', reviewRoutes);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

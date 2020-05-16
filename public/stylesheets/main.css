@@ -50,3 +50,7 @@ body {
   display:flex;
   flex-wrap: wrap;
 }
+
+.checked {
+  color: orange;
+}
