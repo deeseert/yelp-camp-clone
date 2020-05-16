@@ -68,13 +68,24 @@ router.get("/", function (req, res) {
       }
     });
   } else {
+    const perPage = 8;
+    const pageQuery = parseInt(req.query.page);
+    const pageNumber = pageQuery ? pageQuery : 1;
     // Get all campgrounds from DB
-    Campground.find({}, function (err, allCampgrounds) {
-      if (err) {
-        console.log(err);
-      } else {
-        res.render("campgrounds/index", { campgrounds: allCampgrounds, noMatch: noMatch });
-      }
+    Campground.find({}).skip((perPage * pageNumber) - perPage).limit(perPage).exec(function (err, allCampgrounds) {
+      Campground.count().exec(function (err, count) {
+
+        if (err) {
+          console.log(err);
+        } else {
+          res.render("campgrounds/index", {
+            campgrounds: allCampgrounds,
+            noMatch: noMatch,
+            current: pageNumber,
+            pages: Math.ceil(count / perPage)
+          });
+        }
+      });
     });
   }
 });
