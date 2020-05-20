@@ -13,7 +13,6 @@ const dotenv = require('dotenv');
 // configure dotenv
 // require('dotenv').load();
 dotenv.config();
-console.log('Env from server.js: ', process.env.GEOCODER_API_KEY);
 
 const campgrounds = require('./routes/campgrounds');
 const index = require('./routes/index');
@@ -26,7 +25,7 @@ const seedDB = require('./seeds.js');
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://localhost:27017/yelp_camp_v3',
+mongoose.connect(process.env.MONGO_DB,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
