@@ -18,8 +18,10 @@ const reviewRoutes = require("./routes/reviews");
 
 const User = require('./models/user');
 const seedDB = require('./seeds.js');
+const { NODE_ENV } = require('./config');
 const db = process.env.MONGO_DB;
 console.log('db outside: ', db, typeof db);
+console.log('NODE_ENV: ', NODE_ENV, typeof NODE_ENV);
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
