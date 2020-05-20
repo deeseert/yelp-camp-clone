@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 // require('dotenv').config();
 const app = express();
@@ -9,10 +10,6 @@ const LocalStrategy = require('passport-local');
 const methodOverride = require('method-override');
 const flash = require('connect-flash');
 const moment = require('moment');
-const dotenv = require('dotenv');
-// configure dotenv
-// require('dotenv').load();
-dotenv.config();
 
 const campgrounds = require('./routes/campgrounds');
 const index = require('./routes/index');
