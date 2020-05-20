@@ -21,11 +21,12 @@ const reviewRoutes = require("./routes/reviews");
 
 const User = require('./models/user');
 const seedDB = require('./seeds.js');
+const db = process.env.MONGO_DB;
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
 
-mongoose.connect(process.env.MONGO_DB,
+mongoose.connect(db,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
