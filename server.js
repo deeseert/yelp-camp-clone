@@ -1,5 +1,5 @@
-// require('dotenv').config();
 const express = require('express');
+// require('dotenv').config();
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
@@ -22,18 +22,23 @@ const reviewRoutes = require("./routes/reviews");
 const User = require('./models/user');
 const seedDB = require('./seeds.js');
 const db = process.env.MONGO_DB;
+console.log('db outside: ', db, typeof db);
 
 // assign mongoose promise library and connect to database
 mongoose.Promise = global.Promise;
 
-mongoose.connect(db,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-  })
-  .then(() => console.log(`Database connected`))
-  .catch(err => console.log(`Database connection error: ${err.message}`));
+const connectDb = (db) => {
+  console.log('db inside: ', db, typeof db);
+  mongoose.connect(db,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false
+    })
+    .then(() => console.log(`Database connected`))
+    .catch(err => console.log(`Database connection error: ${err.message}`));
+};
+connectDb(db);
 
 // seedDB();
 
